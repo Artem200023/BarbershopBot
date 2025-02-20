@@ -1,0 +1,31 @@
+{
+   "success": true,
+   "data": [
+      {
+         "time": "12:00",
+         "seance_length": 3600,
+         "datetime": 1443513600
+      },
+      {
+         "time": "13:00",
+         "seance_length": 3600,
+         "datetime": 1443517200
+      },
+      {
+         "time": "14:00",
+         "seance_length": 3600,
+         "datetime": 1443520800
+      },
+      {
+         "time": "15:00",
+         "seance_length": 3600,
+         "datetime": 1443524400
+      },
+      {
+         "time": "16:00",
+         "seance_length": 3600,
+         "datetime": 1443528000
+      }
+   ],
+   "meta": []
+}
