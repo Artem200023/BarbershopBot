@@ -1,0 +1,184 @@
+from aiogram.dispatcher import FSMContext # Для того что бы работала последовательность (машина состояний)
+from aiogram.dispatcher.filters.state import State, StatesGroup # Машина состояний
+from aiogram import types, Dispatcher
+from create_bot import dp, bot
+from keyboards import client_kb
+from aiogram.types import ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
+from data_base import sqlite_db
+from aiogram.dispatcher.filters import Text
+#from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+#import asyncio #, time
+
+admin = 1123330844
+adresa = ['пр. Ленина, 90', 'Фрунзе 105']
+
+# Создаем команды
+#@dp.message_handler(commands=['start', 'help'])
+# По вызову команд будут определенные сообщения
+async def command_start(message:types.Message):
+	#time.sleep(0.3) #time
+	#await asyncio.sleep(1) # Задержка 
+# try нужно для того что бы пользователь первый раз когда писал ему присылалсь ссылка на бота  - продолжение except:
+	try:
+# reply_markup=kb_client - переменная в которой находится клава              
+		await bot.send_message(message.from_user.id, 'Хорошего настроения !', reply_markup=client_kb.kb_client)
+# Удаляет команду написанную пользователем 
+		#await message.delete()
+	except:
+		await message.reply('Общение с ботом через ЛС, напишите боту: \nhttps://t.me/BarberArtemBot')
+	await message.delete()
+#@dp.message_handler(lambda message:'Режим работы' in message.text)            #@dp.message_handler(commands=['Режим_работы'])
+# По вызову команд будут определенные сообщения
+async def c_open(message:types.Message):                                         #async def command_open(message:types.Message):
+	await bot.send_message(message.from_user.id, 'Пн-Вс с 10:00 до 21:00')
+
+#@dp.message_handler(lambda message:'Расположение' in message.text)		       #@dp.message_handler(commands=['Расположение'])
+# По вызову команд будут определенные сообщения
+async def c_place(message:types.Message):
+	# reply_markup=ReplyKeyboardRemove() - при нажатии кнопки уходят на совсем
+	await bot.send_message(message.from_user.id, 'ул. Ленина 90, Фрунзе 105')#, reply_markup=ReplyKeyboardRemove())
+
+#@dp.message_handler(lambda message: 'Меню' in message.text)
+async def c_menu(message: types.Message):
+	await sqlite_db.sql_read(message)
+#----------------------------------------------------
+
+#@dp.message_handler(commands='Refresh')            
+# По вызову команд будут определенные сообщения
+async def c_refresh(message:types.Message):                                         
+	await message.answer('Обновлено !', reply_markup=ReplyKeyboardRemove())
+	await message.delete()
+
+#-------------------------------Машина состояний записаться на стрижку---------------------------------------
+
+class FSMClient(StatesGroup):
+	fio = State()
+	phone = State()
+	striga = State()
+	adres = State()
+	master = State()
+	data = State()
+	time = State()
+
+# Начало диалога загрузки нового пункта меню
+#@dp.message_handler(lambda message:'Записаться на стрижку' in message.text, state=None) 
+async def cm_zapis(message: types.Message):
+	await FSMClient.fio.set()
+	await message.answer('Напишите ваше имя:', reply_markup=client_kb.kb_otmena)
+
+#Выход из состояний
+#@dp.message_handler(state="*", commands= 'Отмена')
+#@dp.message_handler(Text(equals='Отмена', ignore_case=True), state="*")
+async def otmena_handler(message: types.Message, state: FSMContext):
+	#current_state = await state.get_state()
+	#if current_state is None:
+		#return
+	await state.finish()
+	await message.reply('Отменил', reply_markup=client_kb.kb_client)
+#Ловим первый ответ от пользователя и пишем в словарь
+#@dp.message_handler(state=FSMClient.fio)
+async def cm_fio(message: types.Message, state: FSMContext):
+	async with state.proxy() as data:
+		data['fio'] = message.text
+	await FSMClient.next()
+	await message.answer('Укажите ваш номер телефона :', reply_markup=client_kb.kb_phone)
+
+#Ловим второй ответ
+#@dp.message_handler(content_types=types.ContentType.CONTACT, state=FSMClient.phone) # Это что бы принимать только по кнопке
+#async def cm_phone(message: types.Message, state: FSMContext): # Связанно с первым 
+#@dp.message_handler(content_types=['contact', 'text'], state=FSMClient.phone)
+async def cm_phone(message: [types.Contact, types.Message], state: FSMContext):
+	async with state.proxy() as data:
+		data['phone'] = message.contact.phone_number if message.contact else message.text
+	await FSMClient.next()
+	await message.answer('Как будем стричься?:', reply_markup=client_kb.kb_otmena) # reply_markup=ReplyKeyboardRemove()) Удалять кнопки
+
+#Ловим третий ответ
+#@dp.message_handler(state=FSMClient.striga)
+async def cm_striga(message: types.Message, state: FSMContext):
+	async with state.proxy() as data:
+		data['striga'] = message.text
+	await FSMClient.next()
+	await message.answer('Выберите адрес :', reply_markup=client_kb.kb_case_adres)
+
+#Ловим четвертый ответ
+#@dp.message_handler(state=FSMClient.adres)
+async def cm_adres(message: types.Message, state: FSMContext):
+	async with state.proxy() as data:
+		data['adres'] = message.text
+	await FSMClient.next()
+
+	if message.text in adresa:
+		await message.answer('Выберите мастера :', reply_markup=client_kb.kb_otmena)
+
+		if data['adres'] == 'пр. Ленина, 90':
+			read = await sqlite_db.sql_readlenina()
+	
+		elif data['adres'] == 'Фрунзе 105':
+			read = await sqlite_db.sql_readfrynze()
+
+		for ret in read:  
+			await bot.send_photo(message.from_user.id, ret[0], f'{ret[1]}\n{ret[2]}',reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton(text=f'Выбрать {ret[1]}', callback_data=f'master {ret[1]}')))
+			#await bot.send_message(message.from_user.id, text='Нажми на кнопку ниже !', reply_markup=client_kb.kb_case_inline)
+
+	else:
+		await message.answer('Дружище выбрать нужно из кнопок !')
+		await FSMClient.previous()
+		
+#Ловим пятый ответ
+#@dp.callback_query_handler(lambda x: x.data and x.data.startswith('master '), state=FSMClient.master)
+async def cm_master(call: types.CallbackQuery, state: FSMContext):
+	async with state.proxy() as data:
+
+		if data['adres'] == 'пр. Ленина, 90':
+			read = await sqlite_db.sql_readlenina()
+				
+		elif data['adres'] == 'Фрунзе 105':
+			read = await sqlite_db.sql_readfrynze()
+
+		for ret in read: 
+			data['master'] = call.data.replace('master ', '') 
+	await FSMClient.next()
+	await call.message.answer('Выберите дату :', reply_markup=client_kb.kb_otmena)
+	
+#Ловим шестой ответ
+#@dp.message_handler(state=FSMClient.data)
+async def cm_data(message: types.Message, state: FSMContext):
+	async with state.proxy() as data:
+		data['data'] = message.text
+	await FSMClient.next()
+	await message.answer('Выберите время :', reply_markup=client_kb.kb_otmena)
+
+#Ловим седьмой ответ
+#@dp.message_handler(state=FSMClient.time)
+async def cm_time(message: types.Message, state: FSMContext):
+	async with state.proxy() as data:
+		data['time'] = message.text
+	await message.answer('Вы успешно записаны !', reply_markup=client_kb.kb_client)
+	await bot.send_message(admin, 'Поступила запись !\n' +'Имя: ' +data['fio'] +'\nТелефон: ' +data['phone'] +'\nСтрижка: ' +data['striga'] +'\nАдрес: ' +data['adres'] +'\nМастер: ' +data['master'] +'\nДата: ' +data['data'] +'\nВремя: ' +data['time'] )
+	#await call.message.answer("Вы успешно записаны !", reply_markup=client_kb.kb_client)
+	#await call.bot.send_message(admin, 'Поступила запись !\n' +'Имя: ' +data['fio'] +'\nТелефон: ' +data['phone'] +'\nСтрижка: ' +data['striga'] +'\nАдрес: ' +data['adres'] +'\nМастер: ' +data['master'] ) #await call.bot.send_message(admin, 'Поступила запись !', f'\nИмя: {data['fio']}\nТелефон: {data['phone']}\nСтрижка: {data['striga']}') 	
+	#await call.bot.send_message(admin, text=f"Поступила запись ! {data['fio'], data['phone'], data['striga']}")
+	#await call.bot.send_message(admin, 'Поступила запись !', f'\nИмя: {data["fio"]}\nТелефон: {data["phone"]}\nСтрижка: {data["striga"]}')
+	await state.finish()
+
+#----------------------------------------------------------------------------------------------------------------
+
+# Регистрируем хендлер и активируем его в главном коде
+def register_handlers_client(dp:Dispatcher):
+	dp.register_message_handler(command_start, commands=['start', 'help'])
+	dp.register_message_handler(c_open, lambda message:'Режим работы' in message.text)
+	dp.register_message_handler(c_place, lambda message:'Расположение' in message.text)
+	dp.register_message_handler(c_menu, lambda message:'Меню' in message.text)
+	dp.register_message_handler(c_refresh, commands='Refresh')
+	#----------------------------Хендлеры записаться на стрижку--------------------------------
+	dp.register_message_handler(cm_zapis, lambda message:'Записаться на стрижку' in message.text, state=None)
+	dp.register_message_handler(otmena_handler, state="*", commands='Отмена')
+	dp.register_message_handler(otmena_handler, Text(equals='Отмена', ignore_case=True), state="*")
+	dp.register_message_handler(cm_fio, state=FSMClient.fio)
+	dp.register_message_handler(cm_phone, content_types=['contact', 'text'], state=FSMClient.phone)
+	dp.register_message_handler(cm_striga, state=FSMClient.striga)
+	dp.register_message_handler(cm_adres, state=FSMClient.adres)
+	dp.register_callback_query_handler(cm_master, lambda x: x.data and x.data.startswith('master '), state=FSMClient.master)
+	dp.register_message_handler(cm_data, state=FSMClient.data)
+	dp.register_message_handler(cm_time, state=FSMClient.time)
