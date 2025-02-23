@@ -1,0 +1,165 @@
+# Создаем бота 
+/newbot
+/setprivacy
+Disable
+
+# Создаем папку, открываем жмем
+shift + правая кнопка мыши
+открываем PowerShell
+#Пишем расположение файла и команду
+python -m venv venv
+venv\Scripts\activate.bat
+pip install aiogram
+___________________________________________
+
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils import executor
+
+import config1  #import os
+
+bot = Bot(token=config1.TOKEN)
+dp = Dispatcher(bot)
+
+#Вывод сообщения в консоли
+async def on_startup(_):
+	print('Бот вышел в онлайн')
+#---------------Клиентская часть----------------
+# Создаем команды
+@dp.message_handler(commands=['start', 'help'])
+# По вызову команд будут определенные сообщения
+async def cammands_start(message:types.Message):
+# try нужно для того что бы пользователь первый раз когда писал ему присылалсь ссылка на бота  - продолжение except:
+	try:
+		await bot.send_message(message.from_user.id, 'Хорошего настроения')
+# Удаляет команду написанную пользователем 
+		await message.delete()
+	except:
+		await message.reply('Общение с ботом через ЛС, напишите боту: \nhttps://t.me/BarberArtemBot')
+
+@dp.message_handler(commands=['Режим_работы'])
+# По вызову команд будут определенные сообщения
+async def cammands_open(message:types.Message):
+		await bot.send_message(message.from_user.id, 'Пн-Вс с 9:00 до 21:00')
+		
+@dp.message_handler(commands=['Расположение'])
+# По вызову команд будут определенные сообщения
+async def cammands_place(message:types.Message):
+		await bot.send_message(message.from_user.id, 'ул. Ленина 90')
+		
+#-----------------------------------------------
+
+#---------------Админская часть-----------------
+
+#-----------------------------------------------
+
+#---------------Общая часть часть---------------
+
+#-----------------------------------------------
+
+@dp.message_handler()
+async def echo_send(message:types.Message):
+	# Ответ на сообщение конкретным текстом
+	if message.text == 'Привет':
+		
+		await message.answer('И тебе привет')
+	elif message.text == 'Салам':
+		
+		await message.answer('И тебе салам')
+	elif message.text == 'Здарова':
+		
+		await message.answer('И тебе здарова')
+	else:
+		
+		await message.answer('Я хз')
+	#____________________________________________
+
+	# Повтор сообщения
+	#await message.answer(message.text)
+
+	# Повтор сообщения ответом на сообщение
+	#await message.reply(message.text)
+
+	# Нужно сначала написать боту (повтор сообщения)
+	#await bot.send_message(message.from_user.id, message.text)
+
+# skip_updates в момент когда бот не онлайн он отвечать не будет
+executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+__________________________________________________________________________________________________________
+
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils import executor
+
+import config1, json, string  #import os
+
+bot = Bot(token=config1.TOKEN)
+dp = Dispatcher(bot)
+
+#Вывод сообщения в консоли
+async def on_startup(_):
+	print('Бот вышел в онлайн')
+#---------------Клиентская часть----------------
+# Создаем команды
+@dp.message_handler(commands=['start', 'help'])
+# По вызову команд будут определенные сообщения
+async def cammands_start(message:types.Message):
+# try нужно для того что бы пользователь первый раз когда писал ему присылалсь ссылка на бота  - продолжение except:
+	try:
+		await bot.send_message(message.from_user.id, 'Хорошего настроения')
+# Удаляет команду написанную пользователем 
+		
+	except:
+		await message.reply('Общение с ботом через ЛС, напишите боту: \nhttps://t.me/BarberArtemBot')
+
+@dp.message_handler(commands=['Режим_работы'])
+# По вызову команд будут определенные сообщения
+async def cammands_open(message:types.Message):
+		await bot.send_message(message.from_user.id, 'Пн-Вс с 9:00 до 21:00')
+		
+@dp.message_handler(commands=['Расположение'])
+# По вызову команд будут определенные сообщения
+async def cammands_place(message:types.Message):
+		await bot.send_message(message.from_user.id, 'ул. Ленина 90')
+		
+#-----------------------------------------------
+
+#---------------Админская часть-----------------
+
+#-----------------------------------------------
+
+#---------------Общая часть часть---------------
+
+#-----------------------------------------------
+
+@dp.message_handler()
+async def echo_send(message:types.Message):
+	#if {i.lower().translate(str.maketrans('', '', string.punctuation)) for i in message.text.split(' ')}\
+		#.intersection(set(json.load(open('cenz.json.txt')))) != set():
+		#await message.reply('Маты запрещены')
+		#await message.delete()
+	if message.text == 'Привет':
+		
+		await message.answer('И тебе привет')
+	elif message.text == 'Салам':
+		
+		await message.answer('И тебе салам')
+	elif message.text == 'Здарова':
+		
+		await message.answer('И тебе здарова')
+	else:
+		
+		await message.answer('Я хз')
+
+        # Повтор сообщения
+	#await message.answer(message.text)
+
+	# Повтор сообщения ответом на сообщение
+	#await message.reply(message.text)
+
+	# Нужно сначала написать боту (повтор сообщения)
+	#await bot.send_message(message.from_user.id, message.text)
+	#____________________________________________
+
+# skip_updates в момент когда бот не онлайн он отвечать не будет
+executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
