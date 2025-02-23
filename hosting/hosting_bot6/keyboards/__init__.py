@@ -1,0 +1,1 @@
+#from keyboards.client_kb import kb_client, kb_phone, kb_otmena, kb_adres # Нужно вписать переменный в импорт которые прописал в client_kb
