@@ -1,0 +1,23 @@
+{
+  "update_id": 736751437,
+  "message": {
+    "message_id": 175,
+    "from": {
+      "id": 1123330844,
+      "is_bot": false,
+      "first_name": "Артем",
+      "last_name": "imTema",
+      "username": "imtema2000",
+      "language_code": "ru"
+    },
+    "chat": {
+      "id": 1123330844,
+      "first_name": "Артем",
+      "last_name": "imTema",
+      "username": "imtema2000",
+      "type": "private"
+    },
+    "date": 1742223782,
+    "text": "Hello"
+  }
+}

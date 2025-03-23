@@ -1,0 +1,63 @@
+from flask import Flask
+from flask import request
+from flask import jsonify
+import requests
+import json
+#from flask_sslify import SSLify # Не обязательно. На локалке не надо
+
+app = Flask(__name__)
+#sslify = SSLify(app) # Не обязательно. На локалке не надо
+
+TOKEN = '7850327724:AAGhx7MJ2dnsnpejP_aw6uhmhRjPoMGf1t8'
+
+#1. Прием сообщений 
+#2. Отсылка сообщений 
+
+URL = 'https://api.telegram.org/bot7850327724:AAGhx7MJ2dnsnpejP_aw6uhmhRjPoMGf1t8/'
+
+def write_json(data, filename='answer.json'):
+	with open(filename, 'w', encoding='utf-8') as f:
+		json.dump(data, f, indent=2, ensure_ascii=False)
+
+#Функция get_updates полезна для реализации механизма получения сообщений в ботах, разрабатываемых с использованием Telegram API. #Однако, если вы используете вебхуки, то больше не нужно опрашивать Telegram для получения обновлений, и эта функция поступает на #второй план.
+
+def get_updates():
+#   https://api.telegram.org/bot7850327724:AAGhx7MJ2dnsnpejP_aw6uhmhRjPoMGf1t8/getUpdates
+
+	url = URL + 'getUpdates'
+	r = requests.get(url)
+	#write_json(r.json())
+	return r.json()
+
+
+def send_message(chat_id,text="bla-bla-bla"):
+	url = URL + 'sendMessage'
+	answer = {'chat_id': chat_id, 'text': text}
+	r = requests.post(url, json=answer)
+	return r.json()
+
+
+@app.route('/', methods=['POST', 'GET'])
+#https://api.telegram.org/bot7850327724:AAGhx7MJ2dnsnpejP_aw6uhmhRjPoMGf1t8/setWebhook?url=https://11ce-219-100-37-244.ngrok-free.app/ - Активация webHooka нужно вписать в браузере
+#curl -X POST "https://api.telegram.org/bot7850327724:AAGhx7MJ2dnsnpejP_aw6uhmhRjPoMGf1t8/setWebhook?url=https://138c-219-100-37-244.ngrok-free.app/"
+def index():
+	if request.method == 'POST':
+		r = request.get_json() # # Получаем данные от Telegram
+		print(r)  # Добавьте эту строку для отладки
+		write_json(r)
+
+		return jsonify(r)
+
+	return '<h1>Bot welcomes you<h1>'
+
+def main():
+	#r = requests.get(URL + 'getMe')
+	#write_json(r.json())
+	#r = get_updates()
+	#chat_id = r['result'][-1]['message']['chat']['id']
+	#send_message(chat_id)
+	pass
+
+if __name__ == '__main__':
+	#main()
+	app.run()
