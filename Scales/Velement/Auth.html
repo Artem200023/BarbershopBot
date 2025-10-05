@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автосалон - Регистрация</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .registration-form {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(255, 193, 7, 0.15);
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .registration-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ffc107, #ff9800, #ff5722);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+        }
+
+        .custom-logo {
+            max-width: 120px;
+            max-height: 80px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            border-radius: 10px;
+            /*box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);*/
+        }
+
+        .default-logo {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .header h1 {
+            color: #ffc107;
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(255, 193, 7, 0.3);
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #cccccc;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #ffc107;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        label::after {
+            content: '*';
+            color: #ff5722;
+            margin-left: 4px;
+        }
+
+        label[for="middleName"]::after {
+            content: '';
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid #444;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #2a2a2a;
+            color: #ffffff;
+            font-family: inherit;
+        }
+
+        input::placeholder {
+            color: #888;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ffc107;
+            background: #333;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+            transform: translateY(-2px);
+        }
+
+        input:hover {
+            border-color: #ffc107;
+            background: #2d2d2d;
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: #000000;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn:disabled::before {
+            display: none;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 50px 30px;
+            display: none;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 20px;
+            border: 2px solid #4caf50;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #4caf50;
+            margin-bottom: 25px;
+            animation: bounce 0.6s ease-in-out;
+            text-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .success-message h2 {
+            color: #4caf50;
+            margin-bottom: 15px;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .success-message p {
+            color: #cccccc;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .car-loader {
+            width: 70px;
+            height: 35px;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+
+        .car-body {
+            width: 70px;
+            height: 25px;
+            background: #ffc107;
+            border-radius: 12px 12px 6px 6px;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(255, 193, 7, 0.3);
+        }
+
+        .car-top {
+            width: 45px;
+            height: 15px;
+            background: #ff9800;
+            border-radius: 6px 6px 0 0;
+            position: absolute;
+            top: -15px;
+            left: 12px;
+        }
+
+        .wheel {
+            width: 14px;
+            height: 14px;
+            background: #333;
+            border: 2px solid #ffc107;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -7px;
+            animation: wheelSpin 0.8s linear infinite;
+        }
+
+        .wheel-front { left: 10px; }
+        .wheel-back { right: 10px; }
+
+        @keyframes wheelSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            color: #ffc107;
+            font-weight: 600;
+            font-size: 16px;
+            text-shadow: 0 2px 5px rgba(255, 193, 7, 0.3);
+        }
+
+        .phone-hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .required {
+            color: #ff5722;
+            font-size: 12px;
+            margin-top: 20px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .registration-form {
+            animation: slideIn 0.6s ease-out;
+        }
+
+        input[type="date"] {
+            cursor: pointer;
+            color: #ffffff;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ffc107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        /* Стили для скроллбара */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ffc107;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="registration-form" id="registrationForm">
+            <div class="header">
+                <div class="logo-container">
+                    <img src="https://i.ibb.co/BKVdhfSs/photo-2024-12-04-11-35-02.jpg" 
+                         alt="Логотип автосалона" 
+                         class="custom-logo"
+                         id="customLogo">
+                    <span class="default-logo" id="defaultLogo">🚗</span>
+                </div>
+                <h1>Вмятый Элемент</h1>
+                <p>Заполните данные для регистрации</p>
+            </div>
+
+            <form id="clientForm">
+                <div class="form-group">
+                    <label for="lastName">Фамилия</label>
+                    <input type="text" id="lastName" name="lastName" required placeholder="Иванов">
+                    <div class="error" id="lastNameError">Пожалуйста, введите фамилию</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="firstName">Имя</label>
+                    <input type="text" id="firstName" name="firstName" required placeholder="Иван">
+                    <div class="error" id="firstNameError">Пожалуйста, введите имя</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="middleName">Отчество</label>
+                    <input type="text" id="middleName" name="middleName" placeholder="Иванович">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Номер телефона</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="+7 (999) 999-99-99">
+                    <div class="error" id="phoneError">Пожалуйста, введите корректный номер телефона</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="birthDate">Дата рождения</label>
+                    <input type="date" id="birthDate" name="birthDate" required>
+                    <div class="error" id="birthDateError">Пожалуйста, введите дату рождения</div>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">
+                     Стать клиентом
+                </button>
+            </form>
+
+            <div class="loader" id="loader">
+                <div class="car-loader">
+                    <div class="car-top"></div>
+                    <div class="car-body"></div>
+                    <div class="wheel wheel-front"></div>
+                    <div class="wheel wheel-back"></div>
+                </div>
+                <p>Регистрируем в системе...</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">🎉</div>
+                <h2>Добро пожаловать в семью!</h2>
+                <p>Регистрация успешно завершена.</p>
+            </div>
+
+            <div class="required">* - обязательные поля для заполнения</div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#ffc107');
+        tg.setBackgroundColor('#000000');
+        
+        const user = tg.initDataUnsafe?.user;
+        const form = document.getElementById('clientForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loader = document.getElementById('loader');
+        const successMessage = document.getElementById('successMessage');
+        const customLogo = document.getElementById('customLogo');
+        const defaultLogo = document.getElementById('defaultLogo');
+
+        // Проверка загрузки логотипа
+        customLogo.onerror = function() {
+            console.log('Логотип не загрузился, показываем эмодзи');
+            customLogo.style.display = 'none';
+            defaultLogo.style.display = 'block';
+        };
+
+        customLogo.onload = function() {
+            console.log('Логотип успешно загружен');
+            defaultLogo.style.display = 'none';
+        };
+
+        // Автозаполнение номера телефона из Telegram
+        if (user && user.phone_number) {
+            document.getElementById('phone').value = user.phone_number;
+        }
+
+        // Маска для телефона
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+            e.target.value = '+7' + (x[2] ? ' (' + x[2] : '') + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+        });
+
+        // Валидация формы
+        function validateForm(formData) {
+            let isValid = true;
+
+            if (!formData.lastName.trim()) {
+                showError('lastNameError', 'Пожалуйста, введите фамилию');
+                isValid = false;
+            } else {
+                hideError('lastNameError');
+            }
+
+            if (!formData.firstName.trim()) {
+                showError('firstNameError', 'Пожалуйста, введите имя');
+                isValid = false;
+            } else {
+                hideError('firstNameError');
+            }
+
+            const phoneRegex = /^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$/;
+            if (!phoneRegex.test(formData.phone)) {
+                showError('phoneError', 'Пожалуйста, введите корректный номер телефона');
+                isValid = false;
+            } else {
+                hideError('phoneError');
+            }
+
+            if (!formData.birthDate) {
+                showError('birthDateError', 'Пожалуйста, введите дату рождения');
+                isValid = false;
+            } else {
+                const birthDate = new Date(formData.birthDate);
+                const today = new Date();
+                const minDate = new Date();
+                minDate.setFullYear(today.getFullYear() - 120);
+                const maxDate = new Date();
+                maxDate.setFullYear(today.getFullYear() - 18);
+
+                if (birthDate < minDate || birthDate > maxDate) {
+                    showError('birthDateError', 'Для регистрации должно быть не менее 18 лет');
+                    isValid = false;
+                } else {
+                    hideError('birthDateError');
+                }
+            }
+
+            return isValid;
+        }
+
+        function showError(errorId, message) {
+            const errorElement = document.getElementById(errorId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function hideError(errorId) {
+            document.getElementById(errorId).style.display = 'none';
+        }
+
+        // Обработка отправки формы
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                lastName: document.getElementById('lastName').value,
+                firstName: document.getElementById('firstName').value,
+                middleName: document.getElementById('middleName').value,
+                phone: document.getElementById('phone').value,
+                birthDate: document.getElementById('birthDate').value,
+                telegramId: user?.id || null,
+                telegramUsername: user?.username || null
+            };
+
+            if (!validateForm(formData)) {
+                return;
+            }
+
+            submitBtn.disabled = true;
+            loader.style.display = 'block';
+            form.style.display = 'none';
+
+            try {
+                await sendDataToServer(formData);
+                loader.style.display = 'none';
+                successMessage.style.display = 'block';
+
+                setTimeout(() => {
+                    tg.close();
+                }, 4000);
+
+            } catch (error) {
+                console.error('Ошибка отправки данных:', error);
+                alert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте еще раз.');
+                submitBtn.disabled = false;
+                loader.style.display = 'none';
+                form.style.display = 'block';
+            }
+        });
+
+        async function sendDataToServer(data) {
+            console.log('Отправка данных в автосалон:', data);
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            return { success: true };
+        }
+
+        // Установка дат
+        const today = new Date();
+        const maxBirthDate = new Date();
+        maxBirthDate.setFullYear(today.getFullYear() - 18);
+        document.getElementById('birthDate').max = maxBirthDate.toISOString().split('T')[0];
+
+        const minBirthDate = new Date();
+        minBirthDate.setFullYear(today.getFullYear() - 120);
+        document.getElementById('birthDate').min = minBirthDate.toISOString().split('T')[0];
+    </script>
+</body>
+</html>
