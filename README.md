@@ -1,2 +1,2 @@
-# BarbershopBot
+# MyProject
 My first project
