@@ -555,10 +555,6 @@
                 loader.style.display = 'none';
                 successMessage.style.display = 'block';
 
-                setTimeout(() => {
-                    tg.close();
-                }, 10000);
-
             } catch (error) {
                 console.error('Ошибка отправки данных:', error);
                 alert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте еще раз.');
@@ -593,5 +589,6 @@
     </script>
 </body>
 </html>
+
 
 
