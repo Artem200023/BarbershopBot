@@ -406,7 +406,7 @@
                 </div>
 
                 <button type="submit" class="btn" id="submitBtn">
-                     Стать клиентом
+                    Авторизоваться
                 </button>
             </form>
 
@@ -549,7 +549,9 @@
             form.style.display = 'none';
 
             try {
-                await sendDataToServer(formData);
+                // ОТПРАВЛЯЕМ ДАННЫЕ В TELEGRAM БОТ
+                await sendDataToBot(formData);
+                
                 loader.style.display = 'none';
                 successMessage.style.display = 'block';
 
@@ -566,9 +568,16 @@
             }
         });
 
-        async function sendDataToServer(data) {
-            console.log('Отправка данных в автосалон:', data);
-            await new Promise(resolve => setTimeout(resolve, 2500));
+        // Функция для отправки данных в Telegram бот
+        async function sendDataToBot(data) {
+            console.log('Отправка данных в бот:', data);
+            
+            // ОСНОВНОЙ ВЫЗОВ - отправляем данные через Telegram WebApp
+            tg.sendData(JSON.stringify(data));
+            
+            // Ждем немного для гарантии отправки
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
             return { success: true };
         }
 
@@ -584,3 +593,4 @@
     </script>
 </body>
 </html>
+
